@@ -17,46 +17,12 @@ type PageData struct {
 	IsDarkMode   bool
 }
 
-func fileWatcher(tmplPath string, lastModTime *time.Time, tmplPtr **template.Template) {
-	for {
-		time.Sleep(1 * time.Second)
-
-		info, err := os.Stat(tmplPath)
-		if err != nil {
-			continue
-		}
-
-		if info.ModTime().After(*lastModTime) {
-			log.Println("Template changed, reloading...")
-
-			newTmpl, err := template.ParseFiles(tmplPath)
-			if err != nil {
-				log.Printf("Error parsing template: %v", err)
-				continue
-			}
-
-			*tmplPtr = newTmpl
-			*lastModTime = info.ModTime()
-			log.Println("Template reloaded successfully")
-		}
-	}
-}
-
 func main() {
 	tmplPath := filepath.Join("templates", "index.html")
-
 	tmpl, err := template.ParseFiles(tmplPath)
 	if err != nil {
 		log.Fatalf("Error parsing template: %v", err)
 	}
-
-	info, err := os.Stat(tmplPath)
-	if err != nil {
-		log.Fatalf("Error getting file info: %v", err)
-	}
-	lastModTime := info.ModTime()
-
-	go fileWatcher(tmplPath, &lastModTime, &tmpl)
 
 	data := PageData{
 		ProfileImage: "/static/images/profile.png",
@@ -66,32 +32,12 @@ func main() {
 		IsDarkMode:   false,
 	}
 
-	fs := http.FileServer(http.Dir("static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
-
-	http.HandleFunc("/livereload.js", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/javascript")
-		w.Write([]byte(`
-			(function() {
-				const checkForReload = () => {
-					fetch('/check-reload')
-						.then(response => response.text())
-						.then(data => {
-							if (data === 'reload') {
-								console.log('Reloading page...');
-								window.location.reload();
-							}
-						})
-						.catch(err => console.error('Error checking for reload:', err));
-				};
-
-				setInterval(checkForReload, 1000);
-				console.log('Live reload enabled');
-			})();
-		`))
-	})
-
+	lastModTime := time.Now()
 	lastReloadTime := time.Now()
+
+	go watchTemplate(tmplPath, &lastModTime, &tmpl)
+
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	http.HandleFunc("/check-reload", func(w http.ResponseWriter, r *http.Request) {
 		if lastModTime.After(lastReloadTime) {
@@ -107,7 +53,7 @@ func main() {
 			Name:     "theme",
 			Value:    "light",
 			Path:     "/",
-			MaxAge:   86400 * 30, // 30 days
+			MaxAge:   86400 * 30,
 			HttpOnly: true,
 		}
 
@@ -136,6 +82,30 @@ func main() {
 	})
 
 	log.Println("Server starting on http://localhost:8080")
-	log.Println("Live reload enabled - changes to templates will auto-refresh the browser")
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func watchTemplate(tmplPath string, lastModTime *time.Time, tmplPtr **template.Template) {
+	for {
+		time.Sleep(1 * time.Second)
+
+		info, err := os.Stat(tmplPath)
+		if err != nil {
+			continue
+		}
+
+		if info.ModTime().After(*lastModTime) {
+			log.Println("Template changed, reloading...")
+
+			newTmpl, err := template.ParseFiles(tmplPath)
+			if err != nil {
+				log.Printf("Error parsing template: %v", err)
+				continue
+			}
+
+			*tmplPtr = newTmpl
+			*lastModTime = info.ModTime()
+			log.Println("Template reloaded successfully")
+		}
+	}
 }
