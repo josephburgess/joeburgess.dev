@@ -47,6 +47,76 @@
           <svg><use href="/static/icons/icons.svg#icon-email"></use></svg>
         </a>
       </div>
+
+      {{ if .GithubRepos }}
+      <div class="github-section">
+        <h2>Recent Projects</h2>
+        <div class="github-repos">
+          {{ range .GithubRepos }}
+          <a href="{{ .URL }}" class="repo-card" target="_blank" rel="noopener">
+            <div class="repo-header">
+              <h3 class="repo-name">{{ .Name }}</h3>
+              {{ if .Language }}
+              <span class="language-tag lang-{{ toLower .Language }}"
+                >{{ .Language }}</span
+              >
+              {{ end }}
+            </div>
+            {{ if .Description }}
+            <p class="repo-description">{{ .Description }}</p>
+            {{ else }}
+            <p class="repo-description empty">No description available</p>
+            {{ end }}
+            <div class="repo-stats">
+              <span class="repo-stars">⭐ {{ .Stars }}</span>
+              <span class="repo-updated"
+                >Updated {{ timeSince .UpdatedAt }}</span
+              >
+            </div>
+          </a>
+          {{ end }}
+        </div>
+      </div>
+      {{ end }} {{ if .GitHubActivities }}
+      <div class="github-activity">
+        <h2>Recent Activity</h2>
+        <div class="activity-timeline">
+          {{ range .GitHubActivities }}
+          <div class="activity-item">
+            <div class="activity-icon">
+              <svg><use href="/static/icons/icons.svg#icon-github"></use></svg>
+            </div>
+            <div class="activity-content">
+              <p>
+                {{ .Action }}
+                <a href="{{ .URL }}" target="_blank" rel="noopener"
+                  >{{ .RepoName }}</a
+                >
+              </p>
+              <span class="activity-time">{{ timeSince .CreatedAt }}</span>
+            </div>
+          </div>
+          {{ end }}
+        </div>
+      </div>
+      {{ end }} {{ if .Weather }}
+      <div class="weather-widget">
+        <img
+          src="{{ .Weather.Icon }}"
+          alt="{{ .Weather.Condition }}"
+          class="weather-icon"
+        />
+        <div class="weather-info">
+          <span class="weather-temp"
+            >{{ printf "%.0f" .Weather.Temperature }}°C</span
+          >
+          <span class="weather-location">{{ .Weather.Location }}</span>
+          <span class="weather-condition">{{ .Weather.Condition }}</span>
+        </div>
+      </div>
+      {{ end }}
+
+      <div class="last-updated">Data last updated: {{ .LastUpdated }}</div>
     </div>
   </body>
 </html>

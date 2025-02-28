@@ -95,6 +95,209 @@ h1 {
   fill: currentColor;
 }
 
+.github-section,
+.github-activity {
+  width: 100%;
+  max-width: 800px;
+  margin-top: 3rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+  color: var(--primary);
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+.github-repos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.repo-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 1.25rem;
+  text-decoration: none;
+  color: var(--primary);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.repo-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.repo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.repo-name {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--link);
+  margin: 0;
+}
+
+.language-tag {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 20px;
+  background: var(--overlay);
+  color: var(--secondary);
+}
+
+.lang-javascript {
+  color: var(--gold);
+}
+.lang-typescript {
+  color: var(--pine);
+}
+.lang-go {
+  color: var(--foam);
+}
+.lang-python {
+  color: var(--iris);
+}
+.lang-ruby {
+  color: var(--love);
+}
+.lang-html {
+  color: var(--rose);
+}
+.lang-css {
+  color: var(--pine);
+}
+
+.repo-description {
+  font-size: 0.85rem;
+  color: var(--secondary);
+  margin-bottom: 1rem;
+  flex-grow: 1;
+}
+
+.repo-description.empty {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.repo-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.activity-timeline {
+  margin-top: 1.5rem;
+  border-left: 2px solid var(--overlay);
+  padding-left: 1.2rem;
+}
+
+.activity-item {
+  position: relative;
+  padding-bottom: 1.5rem;
+  display: flex;
+  margin-left: 1.5rem;
+}
+
+.activity-item:last-child {
+  padding-bottom: 0;
+}
+
+.activity-icon {
+  position: absolute;
+  left: -1.5rem;
+  background: var(--overlay);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.activity-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: var(--accent);
+}
+
+.activity-content {
+  margin-left: 1rem;
+}
+
+.activity-content p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.activity-content a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+.activity-content a:hover {
+  text-decoration: underline;
+  color: var(--link-hover);
+}
+
+.activity-time {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.weather-widget {
+  display: flex;
+  align-items: center;
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  margin-top: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: fit-content;
+}
+
+.weather-icon {
+  width: 50px;
+  height: 50px;
+}
+
+.weather-info {
+  margin-left: 0.8rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.weather-temp {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.weather-location,
+.weather-condition {
+  font-size: 0.8rem;
+  color: var(--secondary);
+}
+
+.last-updated {
+  margin-top: 2rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .profile-img {
     width: 150px;
@@ -103,5 +306,9 @@ h1 {
 
   h1 {
     font-size: 2rem;
+  }
+
+  .github-repos {
+    grid-template-columns: 1fr;
   }
 }
