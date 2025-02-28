@@ -28,6 +28,7 @@ jobs:
           port: 22
           source: "./,!.git/,!tmp/"
           target: "/var/www/joeburgess-dev"
+          protocol: "tcp4"
 
       - name: Deploy Docker container
         uses: appleboy/ssh-action@v1.2.1
