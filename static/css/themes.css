@@ -22,7 +22,7 @@
   --link-hover: var(--foam);
 }
 
-/* Rose Pine Dawn (Light) */
+/* Rose Pine (Dawn) */
 [data-theme="light"] {
   --base: #faf4ed;
   --surface: #fffaf3;
@@ -44,4 +44,10 @@
   --accent: var(--rose);
   --link: var(--pine);
   --link-hover: var(--iris);
+}
+
+html {
+  transition:
+    background-color 0.6s ease,
+    color 0.6s ease;
 }

@@ -1,17 +1,5 @@
 <!doctype html>
-<html
-  lang="en"
-  {{
-  if
-  .IsDarkMode
-  }}data-theme="dark"
-  {{
-  else
-  }}data-theme="light"
-  {{
-  end
-  }}
->
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,12 +13,16 @@
     <link rel="stylesheet" href="/static/css/themes.css" />
     <link rel="stylesheet" href="/static/css/main.css" />
     <script src="/static/js/livereload.js" defer></script>
+
+    <script>
+      (function () {
+        const savedTheme = localStorage.getItem("theme") || "dark";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      })();
+    </script>
   </head>
   <body>
-    <!-- Theme Toggle -->
-    <a href="/toggle-theme" class="theme-toggle"
-      >{{ if .IsDarkMode }}☀️{{ else }}🌙{{ end }}</a
-    >
+    <button class="theme-toggle">🌙</button>
 
     <div class="container">
       <img src="{{ .ProfileImage }}" alt="Joe Burgess" class="profile-img" />
@@ -118,5 +110,8 @@
 
       <div class="last-updated">Data last updated: {{ .LastUpdated }}</div>
     </div>
+
+    <!-- Theme Switcher JavaScript -->
+    <script src="/static/js/theme.js"></script>
   </body>
 </html>
