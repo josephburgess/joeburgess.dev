@@ -1,0 +1,41 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.24"
+
+      - name: Build
+        run: |
+          go build -o joeburgess-site
+
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DO_HOST }}
+          username: ${{ secrets.DO_USERNAME }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          port: 22
+          source: "./,!.git/,!tmp/"
+          target: "/var/www/joeburgess-dev"
+
+      - name: Deploy Docker container
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.DO_HOST }}
+          username: ${{ secrets.DO_USERNAME }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          port: 22
+          script: |
+            cd /var/www/joeburgess-dev
+            docker-compose -f docker-compose.prod.yml up -d --build

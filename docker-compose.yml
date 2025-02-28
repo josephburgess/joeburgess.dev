@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+  joeburgess-site:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+    volumes:
+      - ./static:/app/static
+    ports:
+      - "8081:8080"
+    networks:
+      - joeburgess-network
+
+networks:
+  joeburgess-network:
+    driver: bridge
