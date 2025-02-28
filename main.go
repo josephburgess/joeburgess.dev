@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -166,12 +165,20 @@ func fetchGithubActivity(username string) ([]Activity, error) {
 	return activities, nil
 }
 
+const (
+	BuenosAiresLat = -34.6037
+	BuenosAiresLon = -58.3816
+)
+
 func fetchWeather(location string, apiKey string) (*WeatherData, error) {
 	if apiKey == "" {
 		return nil, nil
 	}
 
-	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric", location, apiKey)
+	lat, lon := BuenosAiresLat, BuenosAiresLon
+
+	url := fmt.Sprintf("https://api.openweathermap.org/data/3.0/onecall?lat=%.6f&lon=%.6f&appid=%s&units=metric&exclude=minutely,hourly,daily,alerts",
+		lat, lon, apiKey)
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -184,23 +191,45 @@ func fetchWeather(location string, apiKey string) (*WeatherData, error) {
 	}
 
 	var result map[string]any
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
 	}
 
-	if err := json.Unmarshal(body, &result); err != nil {
-		return nil, err
+	current, ok := result["current"].(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("invalid API response format")
 	}
 
-	main := result["main"].(map[string]any)
-	weather := result["weather"].([]any)[0].(map[string]any)
+	weatherArray, ok := current["weather"].([]any)
+	if !ok || len(weatherArray) == 0 {
+		return nil, fmt.Errorf("weather data not found in API response")
+	}
+
+	weather, ok := weatherArray[0].(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("invalid weather data format")
+	}
+
+	temp, ok := current["temp"].(float64)
+	if !ok {
+		return nil, fmt.Errorf("temperature data not found or invalid")
+	}
+
+	condition, ok := weather["main"].(string)
+	if !ok {
+		condition = "Unknown"
+	}
+
+	icon, ok := weather["icon"].(string)
+	if !ok {
+		icon = "01d"
+	}
 
 	return &WeatherData{
 		Location:    location,
-		Temperature: main["temp"].(float64),
-		Condition:   weather["main"].(string),
-		Icon:        fmt.Sprintf("https://openweathermap.org/img/wn/%s@2x.png", weather["icon"].(string)),
+		Temperature: temp,
+		Condition:   condition,
+		Icon:        fmt.Sprintf("https://openweathermap.org/img/wn/%s@2x.png", icon),
 		LastUpdated: time.Now(),
 	}, nil
 }
@@ -315,7 +344,7 @@ func main() {
 
 	weatherApiKey := os.Getenv("OPENWEATHER_API_KEY")
 	githubUsername := "josephburgess"
-	weatherLocation := "London,uk"
+	weatherLocation := "Buenosaires, AR"
 
 	var mu sync.Mutex
 	data := PageData{
@@ -403,7 +432,7 @@ func main() {
 		}
 
 		mu.Lock()
-		localData := data // Create a local copy to avoid race conditions
+		localData := data
 		mu.Unlock()
 
 		err = tmpl.Execute(w, localData)
