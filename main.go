@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -20,6 +21,7 @@ type PageData struct {
 	ProfileImage     string
 	GithubURL        string
 	LinkedInURL      string
+	BreezeURL        string
 	Email            string
 	IsDarkMode       bool
 	GithubRepos      []Repository
@@ -175,10 +177,11 @@ func fetchWeather(location string, apiKey string) (*WeatherData, error) {
 		return nil, nil
 	}
 
-	lat, lon := BuenosAiresLat, BuenosAiresLon
-
-	url := fmt.Sprintf("https://api.openweathermap.org/data/3.0/onecall?lat=%.6f&lon=%.6f&appid=%s&units=metric&exclude=minutely,hourly,daily,alerts",
-		lat, lon, apiKey)
+	url := fmt.Sprintf("https://breeze.joeburgess.dev/api/weather/%s?api_key=%s&units=%s",
+		url.QueryEscape(location),
+		apiKey,
+		"metric",
+	)
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -187,7 +190,7 @@ func fetchWeather(location string, apiKey string) (*WeatherData, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("weather API returned status: %s", resp.Status)
+		return nil, fmt.Errorf("breeze API returned status: %s", resp.Status)
 	}
 
 	var result map[string]any
@@ -195,7 +198,12 @@ func fetchWeather(location string, apiKey string) (*WeatherData, error) {
 		return nil, err
 	}
 
-	current, ok := result["current"].(map[string]any)
+	weatherResponse, ok := result["weather"].(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("invalid API response format")
+	}
+
+	current, ok := weatherResponse["current"].(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("invalid API response format")
 	}
@@ -342,7 +350,7 @@ func main() {
 		log.Println("No .env file found or error loading it. Using environment variables directly.")
 	}
 
-	weatherApiKey := os.Getenv("OPENWEATHER_API_KEY")
+	weatherApiKey := os.Getenv("BREEZE_API_KEY")
 	githubUsername := "josephburgess"
 	weatherLocation := "Buenosaires, AR"
 
@@ -351,6 +359,7 @@ func main() {
 		ProfileImage: "/static/images/profile.png",
 		GithubURL:    "https://github.com/josephburgess",
 		LinkedInURL:  "https://linkedin.com/in/josephburgessmba",
+		BreezeURL:    "https://github.com/josephburgess/breeze",
 		Email:        "joe@joeburgess.dev",
 		IsDarkMode:   false,
 	}
@@ -372,27 +381,6 @@ func main() {
 		} else {
 			w.Write([]byte("ok"))
 		}
-	})
-
-	http.HandleFunc("/toggle-theme", func(w http.ResponseWriter, r *http.Request) {
-		cookie := &http.Cookie{
-			Name:     "theme",
-			Value:    "light",
-			Path:     "/",
-			MaxAge:   86400 * 30,
-			HttpOnly: true,
-		}
-
-		if data.IsDarkMode {
-			cookie.Value = "light"
-			data.IsDarkMode = false
-		} else {
-			cookie.Value = "dark"
-			data.IsDarkMode = true
-		}
-
-		http.SetCookie(w, cookie)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
 
 	http.HandleFunc("/api/github-data", func(w http.ResponseWriter, r *http.Request) {

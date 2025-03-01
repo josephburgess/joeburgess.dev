@@ -320,3 +320,20 @@ h2 {
     grid-template-columns: 1fr;
   }
 }
+
+.weather-powered-by {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 0.3rem;
+}
+
+.breeze-link {
+  color: var(--link);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breeze-link:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
