@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     environment:
-      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+      - BREEZE_API_KEY=${BREEZE_API_KEY}
     volumes:
       - ./static:/app/static
     ports:
