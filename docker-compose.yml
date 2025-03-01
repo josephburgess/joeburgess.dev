@@ -1,13 +1,12 @@
 version: "3"
-
 services:
   joeburgess-site:
     build:
       context: .
       dockerfile: Dockerfile
     restart: always
-    environment:
-      - BREEZE_API_KEY=${BREEZE_API_KEY}
+    env_file:
+      - .env
     volumes:
       - ./static:/app/static
     ports:
