@@ -2,11 +2,15 @@ package weather
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 
+	"github.com/josephburgess/joeburgess-dev/internal/logging"
 	"github.com/josephburgess/joeburgess-dev/internal/models"
 )
 
@@ -29,7 +33,14 @@ func (c *Client) FetchWeather(location string) (*models.WeatherData, error) {
 		return nil, nil
 	}
 
-	requestURL := fmt.Sprintf("https://breeze.joeburgess.dev/api/weather/%s?api_key=%s&units=%s",
+	baseURL := os.Getenv("BREEZE_API_URL")
+	if baseURL == "" {
+		baseURL = "http://localhost:8080"
+	}
+
+	logging.Info("Using BREEZE_API_URL: %s", baseURL)
+	requestURL := fmt.Sprintf("%s/api/weather/%s?api_key=%s&units=%s",
+		baseURL,
 		url.QueryEscape(location),
 		c.apiKey,
 		"metric",
@@ -37,12 +48,16 @@ func (c *Client) FetchWeather(location string) (*models.WeatherData, error) {
 
 	resp, err := c.httpClient.Get(requestURL)
 	if err != nil {
+		logging.Error("HTTP request failed", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("breeze API returned status: %s", resp.Status)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		errMsg := fmt.Sprintf("breeze API returned status: %s, body: %s", resp.Status, string(bodyBytes))
+		logging.Warn(errMsg)
+		return nil, errors.New(errMsg)
 	}
 
 	var result map[string]any
