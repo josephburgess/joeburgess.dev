@@ -12,7 +12,6 @@
     />
     <link rel="stylesheet" href="/static/css/themes.css" />
     <link rel="stylesheet" href="/static/css/main.css" />
-    <script src="/static/js/livereload.js" defer></script>
 
     <script>
       (function () {
@@ -104,6 +103,10 @@
           >
           <span class="weather-location">{{ .Weather.Location }}</span>
           <span class="weather-condition">{{ .Weather.Condition }}</span>
+          <span class="weather-powered-by"
+            >Powered by
+            <a href="{{ .BreezeURL }}" class="breeze-link">Breeze API</a></span
+          >
         </div>
       </div>
       {{ end }}
