@@ -3,7 +3,7 @@
 My personal website built with Go, serving as a basic snapshot of what I'm up to. Its pretty lightweight and just shows some GitHub activity. I didn't use a frontend framework, just Go's `html/template` package.
 
 <p align="center">
-    <img src="https://github.com/user-attachments/assets/49e4a867-a6c3-437a-ab7b-fb5156265f92" width="600" />
+    <img src="https://github.com/user-attachments/assets/2442bb25-0fc1-4049-a1f0-42a17be08ee4" width="600" />
 </p>
 
 ## Features
