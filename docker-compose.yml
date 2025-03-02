@@ -19,3 +19,4 @@ services:
 networks:
   joeburgess-network:
     name: joeburgess-network
+    external: true
