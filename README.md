@@ -3,7 +3,7 @@
 My personal website built with Go, serving as a lightweight snapshot of what I'm up to.
 
 <p align="center">
-    <img src="https://utfs.io/f/rTP6bTd9GhW2vtyxGPjX4zSl8t9kHTyEbJ1qFs7rfdVaLjIx" width="600" />
+    <img src="https://github.com/user-attachments/assets/49e4a867-a6c3-437a-ab7b-fb5156265f92" width="600" />
 </p>
 
 ## Overview
