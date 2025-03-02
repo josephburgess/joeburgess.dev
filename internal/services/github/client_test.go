@@ -1,23 +1,15 @@
 package github
 
 import (
-	"bytes"
-	"io"
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
 
+	"github.com/jarcoal/httpmock"
 	"github.com/josephburgess/joeburgess-dev/internal/models"
 	"github.com/stretchr/testify/assert"
 )
-
-type MockTransport struct {
-	RoundTripFunc func(req *http.Request) (*http.Response, error)
-}
-
-func (m *MockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	return m.RoundTripFunc(req)
-}
 
 func TestNewClient(t *testing.T) {
 	username := "testuser"
@@ -40,30 +32,30 @@ func TestFetchRepositories(t *testing.T) {
 			name:           "successful response",
 			responseStatus: http.StatusOK,
 			responseBody: `[
-				{"name": "repo1", "description": "test repo 1", "html_url": "https://github.com/testuser/repo1", "language": "Go", "stargazers_count": 10, "forks_count": 5, "updated_at": "2023-01-01T00:00:00Z"},
-				{"name": "repo2", "description": "test repo 2", "html_url": "https://github.com/testuser/repo2", "language": "JavaScript", "stargazers_count": 20, "forks_count": 10, "updated_at": "2023-01-02T00:00:00Z"}
-			]`,
+        {"name": "gust", "updated_at": "2023-01-01T00:00:00Z"},
+        {"name": "breeze", "updated_at": "2023-01-02T00:00:00Z"}
+      ]`,
 			expectedError: false,
 			expectedRepos: 2,
 		},
 		{
-			name:           "GitHub API error",
+			name:           "API err",
 			responseStatus: http.StatusUnauthorized,
-			responseBody:   `{"message": "Unauthorized"}`,
+			responseBody:   `{"message": "noway jose"}`,
 			expectedError:  true,
 			expectedRepos:  0,
 		},
 		{
-			name:           "more than 6 repositories",
+			name:           "more than 6 repos",
 			responseStatus: http.StatusOK,
 			responseBody: `[
-				{"name": "repo1", "updated_at": "2023-01-07T00:00:00Z"},
-				{"name": "repo2", "updated_at": "2023-01-06T00:00:00Z"},
-				{"name": "repo3", "updated_at": "2023-01-05T00:00:00Z"},
-				{"name": "repo4", "updated_at": "2023-01-04T00:00:00Z"},
-				{"name": "repo5", "updated_at": "2023-01-03T00:00:00Z"},
-				{"name": "repo6", "updated_at": "2023-01-02T00:00:00Z"},
-				{"name": "repo7", "updated_at": "2023-01-01T00:00:00Z"}
+				{"name": "madvillainy", "updated_at": "2023-01-07T00:00:00Z"},
+				{"name": "borrowed time", "updated_at": "2023-01-06T00:00:00Z"},
+				{"name": "clock ticks faster", "updated_at": "2023-01-05T00:00:00Z"},
+				{"name": "the hour they", "updated_at": "2023-01-04T00:00:00Z"},
+				{"name": "knock the sick blaster", "updated_at": "2023-01-03T00:00:00Z"},
+				{"name": "dick dastardly", "updated_at": "2023-01-02T00:00:00Z"},
+				{"name": "mutley with sick laughter", "updated_at": "2023-01-01T00:00:00Z"}
 			]`,
 			expectedError: false,
 			expectedRepos: 6,
@@ -72,26 +64,19 @@ func TestFetchRepositories(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			client := &Client{
-				username: "testuser",
-				httpClient: &http.Client{
-					Transport: &MockTransport{
-						RoundTripFunc: func(req *http.Request) (*http.Response, error) {
-							assert.Contains(t, req.URL.String(), "/users/testuser/repos")
-							assert.Equal(t, "GET", req.Method)
-							assert.Equal(t, "application/vnd.github.v3+json", req.Header.Get("Accept"))
+			httpmock.Activate()
+			defer httpmock.DeactivateAndReset()
 
-							return &http.Response{
-								StatusCode: tc.responseStatus,
-								Body:       io.NopCloser(bytes.NewBufferString(tc.responseBody)),
-								Header:     make(http.Header),
-							}, nil
-						},
-					},
-				},
-			}
+			username := "testuser"
+			url := fmt.Sprintf("https://api.github.com/users/%s/repos?sort=updated&per_page=6", username)
+			httpmock.RegisterResponder("GET", url,
+				httpmock.NewStringResponder(tc.responseStatus, tc.responseBody))
 
+			client := NewClient(username)
 			repos, err := client.FetchRepositories()
+
+			callCount := httpmock.GetCallCountInfo()
+			assert.Equal(t, 1, callCount["GET "+url])
 
 			if tc.expectedError {
 				assert.Error(t, err)
@@ -102,7 +87,7 @@ func TestFetchRepositories(t *testing.T) {
 				assert.Len(t, repos, tc.expectedRepos)
 
 				if len(repos) > 1 {
-					for i := 0; i < len(repos)-1; i++ {
+					for i := range repos[:len(repos)-1] {
 						assert.True(t, repos[i].UpdatedAt.After(repos[i+1].UpdatedAt) || repos[i].UpdatedAt.Equal(repos[i+1].UpdatedAt))
 					}
 				}
@@ -124,8 +109,8 @@ func TestFetchActivity(t *testing.T) {
 			name:           "successful response",
 			responseStatus: http.StatusOK,
 			responseBody: `[
-				{"type": "PushEvent", "repo": {"name": "testuser/repo1"}, "created_at": "2023-01-01T00:00:00Z"},
-				{"type": "WatchEvent", "repo": {"name": "testuser/repo2"}, "created_at": "2023-01-02T00:00:00Z"}
+				{"type": "PushEvent", "repo": {"name": "catch a throatful"}, "created_at": "2023-01-01T00:00:00Z"},
+				{"type": "WatchEvent", "repo": {"name": "fire vocal"}, "created_at": "2023-01-02T00:00:00Z"}
 			]`,
 			expectedError:    false,
 			expectedActivity: 2,
@@ -164,26 +149,19 @@ func TestFetchActivity(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			client := &Client{
-				username: "testuser",
-				httpClient: &http.Client{
-					Transport: &MockTransport{
-						RoundTripFunc: func(req *http.Request) (*http.Response, error) {
-							assert.Contains(t, req.URL.String(), "/users/testuser/events")
-							assert.Equal(t, "GET", req.Method)
-							assert.Equal(t, "application/vnd.github.v3+json", req.Header.Get("Accept"))
+			httpmock.Activate()
+			defer httpmock.DeactivateAndReset()
 
-							return &http.Response{
-								StatusCode: tc.responseStatus,
-								Body:       io.NopCloser(bytes.NewBufferString(tc.responseBody)),
-								Header:     make(http.Header),
-							}, nil
-						},
-					},
-				},
-			}
+			username := "josephburgess"
+			url := fmt.Sprintf("https://api.github.com/users/%s/events?per_page=10", username)
+			httpmock.RegisterResponder("GET", url,
+				httpmock.NewStringResponder(tc.responseStatus, tc.responseBody))
 
+			client := NewClient(username)
 			activities, err := client.FetchActivity()
+
+			callCount := httpmock.GetCallCountInfo()
+			assert.Equal(t, 1, callCount["GET "+url])
 
 			if tc.expectedError {
 				assert.Error(t, err)
