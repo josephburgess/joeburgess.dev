@@ -10,13 +10,13 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o joeburgess-site
+RUN CGO_ENABLED=0 GOOS=linux go build -o joeburgess
 
 FROM alpine:3.18
 
 WORKDIR /app
 
-COPY --from=builder /app/joeburgess-site .
+COPY --from=builder /app/joeburgess .
 
 COPY static/ /app/static/
 COPY templates/ /app/templates/
@@ -25,4 +25,4 @@ RUN mkdir -p /app/data
 
 EXPOSE 8080
 
-CMD ["./joeburgess-site"]
+CMD ["./joeburgess"]

@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/josephburgess/joeburgess-dev/internal/api/handlers"
-	"github.com/josephburgess/joeburgess-dev/internal/logging"
-	"github.com/josephburgess/joeburgess-dev/internal/templates"
+	"github.com/josephburgess/joeburgess.dev/internal/api/handlers"
+	"github.com/josephburgess/joeburgess.dev/internal/logging"
+	"github.com/josephburgess/joeburgess.dev/internal/templates"
 )
 
 func Setup(tmplRenderer *templates.Renderer, dataUpdater *templates.DataUpdater) *http.Server {

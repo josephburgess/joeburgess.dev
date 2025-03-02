@@ -10,8 +10,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/josephburgess/joeburgess-dev/internal/logging"
-	"github.com/josephburgess/joeburgess-dev/internal/models"
+	"github.com/josephburgess/joeburgess.dev/internal/logging"
+	"github.com/josephburgess/joeburgess.dev/internal/models"
 )
 
 type Client struct {

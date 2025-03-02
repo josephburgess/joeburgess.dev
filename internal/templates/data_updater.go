@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/josephburgess/joeburgess-dev/internal/services/github"
-	"github.com/josephburgess/joeburgess-dev/internal/services/weather"
+	"github.com/josephburgess/joeburgess.dev/internal/services/github"
+	"github.com/josephburgess/joeburgess.dev/internal/services/weather"
 )
 
 type DataUpdater struct {

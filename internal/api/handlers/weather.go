@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/josephburgess/joeburgess-dev/internal/services/weather"
+	"github.com/josephburgess/joeburgess.dev/internal/services/weather"
 )
 
 type WeatherHandler struct {

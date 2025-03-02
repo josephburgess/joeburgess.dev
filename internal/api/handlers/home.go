@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/josephburgess/joeburgess-dev/internal/templates"
+	"github.com/josephburgess/joeburgess.dev/internal/templates"
 )
 
 type HomeHandler struct {

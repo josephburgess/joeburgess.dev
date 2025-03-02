@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/josephburgess/joeburgess-dev/internal/templates"
+	"github.com/josephburgess/joeburgess.dev/internal/templates"
 )
 
 type GithubHandler struct {

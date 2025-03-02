@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/josephburgess/joeburgess-dev/internal/models"
+	"github.com/josephburgess/joeburgess.dev/internal/models"
 )
 
 type PageData struct {

@@ -1,11 +1,11 @@
 version: "3"
 services:
-  joeburgess-site:
+  joeburgess:
     build:
       context: .
       dockerfile: Dockerfile
     restart: always
-    container_name: joeburgess-site
+    container_name: joeburgess
     environment:
       - BREEZE_API_KEY=${BREEZE_API_KEY}
       - BREEZE_API_URL=http://breeze:8080

@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	"github.com/josephburgess/joeburgess-dev/internal/api"
-	"github.com/josephburgess/joeburgess-dev/internal/config"
-	"github.com/josephburgess/joeburgess-dev/internal/logging"
-	"github.com/josephburgess/joeburgess-dev/internal/services/github"
-	"github.com/josephburgess/joeburgess-dev/internal/services/weather"
-	"github.com/josephburgess/joeburgess-dev/internal/templates"
+	"github.com/josephburgess/joeburgess.dev/internal/api"
+	"github.com/josephburgess/joeburgess.dev/internal/config"
+	"github.com/josephburgess/joeburgess.dev/internal/logging"
+	"github.com/josephburgess/joeburgess.dev/internal/services/github"
+	"github.com/josephburgess/joeburgess.dev/internal/services/weather"
+	"github.com/josephburgess/joeburgess.dev/internal/templates"
 )
 
 func main() {

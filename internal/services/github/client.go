@@ -7,7 +7,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/josephburgess/joeburgess-dev/internal/models"
+	"github.com/josephburgess/joeburgess.dev/internal/models"
 )
 
 type Client struct {
