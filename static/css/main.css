@@ -15,6 +15,15 @@ body {
   letter-spacing: -0.02em;
 }
 
+*,
+*::before,
+*::after {
+  transition:
+    background-color 0.6s ease,
+    color 0.6s ease,
+    border-color 0.6s ease,
+    box-shadow 0.6s ease;
+}
 .theme-toggle {
   position: fixed;
   top: 1.5rem;
@@ -34,13 +43,16 @@ body {
   z-index: 10;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition:
-    background 0.3s ease,
-    color 0.3s ease;
+    background 0.6s ease,
+    color 0.6s ease;
 }
 
 .theme-toggle:hover {
   background: var(--muted);
   color: var(--text);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .container {
@@ -80,7 +92,6 @@ h1 {
 .social-link {
   color: var(--secondary);
   text-decoration: none;
-  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,6 +99,21 @@ h1 {
   height: 50px;
   border-radius: 50%;
   background: var(--overlay);
+  transition:
+    transform 0.2s ease,
+    color 0.6s ease,
+    background-color 0.6s ease,
+    box-shadow 0.6s ease;
+}
+
+.social-link svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  transition: fill 0.1s ease;
+}
+.social-link:hover svg {
+  transition: fill 0.1s ease;
 }
 
 .social-link:hover {
@@ -95,6 +121,11 @@ h1 {
   color: var(--accent);
   background: var(--overlay);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease,
+    background-color 0.6s ease,
+    box-shadow 0.2s ease;
 }
 
 .social-link svg {
@@ -131,8 +162,10 @@ h2 {
   text-decoration: none;
   color: var(--primary);
   transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.6s ease,
+    color 0.6s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
