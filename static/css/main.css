@@ -4,6 +4,16 @@
   box-sizing: border-box;
 }
 
+*,
+*::before,
+*::after {
+  transition:
+    background-color 0.6s ease,
+    color 0.6s ease,
+    border-color 0.6s ease,
+    box-shadow 0.6s ease;
+}
+
 body {
   font-family: "JetBrains Mono", monospace;
   background-color: var(--background);
@@ -13,6 +23,15 @@ body {
   align-items: center;
   min-height: 100vh;
   letter-spacing: -0.02em;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  max-width: 100%;
 }
 
 .theme-toggle {
@@ -34,22 +53,16 @@ body {
   z-index: 10;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition:
-    background 0.3s ease,
-    color 0.3s ease;
+    background 0.6s ease,
+    color 0.6s ease;
 }
 
 .theme-toggle:hover {
   background: var(--muted);
   color: var(--text);
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  max-width: 100%;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .profile-img {
@@ -80,7 +93,6 @@ h1 {
 .social-link {
   color: var(--secondary);
   text-decoration: none;
-  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,6 +100,11 @@ h1 {
   height: 50px;
   border-radius: 50%;
   background: var(--overlay);
+  transition:
+    transform 0.2s ease,
+    color 0.6s ease,
+    background-color 0.6s ease,
+    box-shadow 0.6s ease;
 }
 
 .social-link:hover {
@@ -95,12 +112,18 @@ h1 {
   color: var(--accent);
   background: var(--overlay);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease,
+    background-color 0.6s ease,
+    box-shadow 0.2s ease;
 }
 
 .social-link svg {
   width: 24px;
   height: 24px;
   fill: currentColor;
+  transition: fill 0.1s ease;
 }
 
 .github-section,
@@ -130,13 +153,15 @@ h2 {
   padding: 1.25rem;
   text-decoration: none;
   color: var(--primary);
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   height: 100%;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.6s ease,
+    color 0.6s ease;
 }
 
 .repo-card:hover {
@@ -249,11 +274,13 @@ h2 {
 .activity-content p {
   margin: 0;
   font-size: 0.9rem;
+  transition: color 0.3s ease;
 }
 
 .activity-content a {
   color: var(--link);
   text-decoration: none;
+  transition: color 0.3s ease;
 }
 
 .activity-content a:hover {
@@ -264,6 +291,7 @@ h2 {
 .activity-time {
   font-size: 0.75rem;
   color: var(--muted);
+  transition: color 0.3s ease;
 }
 
 .weather-widget {
@@ -299,6 +327,23 @@ h2 {
   color: var(--secondary);
 }
 
+.weather-powered-by {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 0.3rem;
+}
+
+.breeze-link {
+  color: var(--link);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breeze-link:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
 .last-updated {
   margin-top: 2rem;
   font-size: 0.75rem;
@@ -319,21 +364,4 @@ h2 {
   .github-repos {
     grid-template-columns: 1fr;
   }
-}
-
-.weather-powered-by {
-  font-size: 0.7rem;
-  color: var(--muted);
-  margin-top: 0.3rem;
-}
-
-.breeze-link {
-  color: var(--link);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.breeze-link:hover {
-  color: var(--link-hover);
-  text-decoration: underline;
 }
