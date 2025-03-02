@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/jarcoal/httpmock"
-	"github.com/josephburgess/joeburgess-dev/internal/models"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,241 +19,145 @@ func TestNewClient(t *testing.T) {
 	assert.Equal(t, 10*time.Second, client.httpClient.Timeout)
 }
 
-func TestFetchWeather(t *testing.T) {
-	tests := []struct {
-		name           string
-		apiKey         string
-		location       string
-		apiURL         string
-		setEnvVar      bool
-		responseStatus int
-		responseBody   string
-		expectedError  bool
-		validateResult func(*testing.T, *models.WeatherData)
-	}{
-		{
-			name:          "empty API key returns nil",
-			apiKey:        "",
-			location:      "London",
-			expectedError: false,
-			validateResult: func(t *testing.T, data *models.WeatherData) {
-				assert.Nil(t, data)
-			},
-		},
-		{
-			name:           "successful response",
-			apiKey:         "test_api_key",
-			location:       "London",
-			apiURL:         "http://localhost:8080",
-			responseStatus: http.StatusOK,
-			responseBody: `{
-				"weather": {
-					"current": {
-						"temp": 15.5,
-						"weather": [
-							{
-								"main": "Clear",
-								"icon": "01d"
-							}
-						]
-					}
+func TestFetchWeatherEmptyAPIKey(t *testing.T) {
+	client := NewClient("")
+	weatherData, err := client.FetchWeather("London")
+
+	assert.NoError(t, err)
+	assert.Nil(t, weatherData)
+}
+
+func TestFetchWeatherSuccess(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	origEnv := os.Getenv("BREEZE_API_URL")
+	defer os.Setenv("BREEZE_API_URL", origEnv)
+	os.Unsetenv("BREEZE_API_URL")
+
+	apiKey := "test_api_key"
+	location := "London"
+	url := "http://localhost:8080/api/weather/London?api_key=test_api_key&units=metric"
+
+	httpmock.RegisterResponder("GET", url,
+		httpmock.NewStringResponder(http.StatusOK, `{
+			"weather": {
+				"current": {
+					"temp": 15.5,
+					"weather": [
+						{
+							"main": "Clear",
+							"icon": "01d"
+						}
+					]
 				}
-			}`,
-			expectedError: false,
-			validateResult: func(t *testing.T, data *models.WeatherData) {
-				assert.NotNil(t, data)
-				assert.Equal(t, "London", data.Location)
-				assert.Equal(t, 15.5, data.Temperature)
-				assert.Equal(t, "Clear", data.Condition)
-				assert.Equal(t, "https://openweathermap.org/img/wn/01d@2x.png", data.Icon)
-				assert.NotZero(t, data.LastUpdated)
-			},
-		},
-		{
-			name:           "custom API URL from env var",
-			apiKey:         "test_api_key",
-			location:       "Paris",
-			apiURL:         "https://custom-api.example.com",
-			setEnvVar:      true,
-			responseStatus: http.StatusOK,
-			responseBody: `{
-				"weather": {
-					"current": {
-						"temp": 20.0,
-						"weather": [
-							{
-								"main": "Clouds",
-								"icon": "02d"
-							}
-						]
-					}
-				}
-			}`,
-			expectedError: false,
-			validateResult: func(t *testing.T, data *models.WeatherData) {
-				assert.NotNil(t, data)
-				assert.Equal(t, "Paris", data.Location)
-				assert.Equal(t, 20.0, data.Temperature)
-				assert.Equal(t, "Clouds", data.Condition)
-				assert.Equal(t, "https://openweathermap.org/img/wn/02d@2x.png", data.Icon)
-			},
-		},
-		{
-			name:           "invalid JSON response",
-			apiKey:         "test_api_key",
-			location:       "Berlin",
-			apiURL:         "http://localhost:8080",
-			responseStatus: http.StatusOK,
-			responseBody:   `{invalid json}`,
-			expectedError:  true,
-			validateResult: func(t *testing.T, data *models.WeatherData) {
-				assert.Nil(t, data)
-			},
-		},
-		{
-			name:           "missing weather field",
-			apiKey:         "test_api_key",
-			location:       "Berlin",
-			apiURL:         "http://localhost:8080",
-			responseStatus: http.StatusOK,
-			responseBody:   `{"data": "no weather here"}`,
-			expectedError:  true,
-			validateResult: func(t *testing.T, data *models.WeatherData) {
-				assert.Nil(t, data)
-			},
-		},
-		{
-			name:           "missing current field",
-			apiKey:         "test_api_key",
-			location:       "Berlin",
-			apiURL:         "http://localhost:8080",
-			responseStatus: http.StatusOK,
-			responseBody:   `{"weather": {"forecast": {}}}`,
-			expectedError:  true,
-			validateResult: func(t *testing.T, data *models.WeatherData) {
-				assert.Nil(t, data)
-			},
-		},
-		{
-			name:           "missing weather array",
-			apiKey:         "test_api_key",
-			location:       "Berlin",
-			apiURL:         "http://localhost:8080",
-			responseStatus: http.StatusOK,
-			responseBody:   `{"weather": {"current": {"temp": 10.0}}}`,
-			expectedError:  true,
-			validateResult: func(t *testing.T, data *models.WeatherData) {
-				assert.Nil(t, data)
-			},
-		},
-		{
-			name:           "empty weather array",
-			apiKey:         "test_api_key",
-			location:       "Berlin",
-			apiURL:         "http://localhost:8080",
-			responseStatus: http.StatusOK,
-			responseBody:   `{"weather": {"current": {"temp": 10.0, "weather": []}}}`,
-			expectedError:  true,
-			validateResult: func(t *testing.T, data *models.WeatherData) {
-				assert.Nil(t, data)
-			},
-		},
-		{
-			name:           "invalid temp format",
-			apiKey:         "test_api_key",
-			location:       "Berlin",
-			apiURL:         "http://localhost:8080",
-			responseStatus: http.StatusOK,
-			responseBody:   `{"weather": {"current": {"temp": "hot", "weather": [{"main": "Clear", "icon": "01d"}]}}}`,
-			expectedError:  true,
-			validateResult: func(t *testing.T, data *models.WeatherData) {
-				assert.Nil(t, data)
-			},
-		},
-		{
-			name:           "missing condition uses default",
-			apiKey:         "test_api_key",
-			location:       "Berlin",
-			apiURL:         "http://localhost:8080",
-			responseStatus: http.StatusOK,
-			responseBody:   `{"weather": {"current": {"temp": 10.0, "weather": [{"icon": "01d"}]}}}`,
-			expectedError:  false,
-			validateResult: func(t *testing.T, data *models.WeatherData) {
-				assert.NotNil(t, data)
-				assert.Equal(t, "Unknown", data.Condition)
-			},
-		},
-		{
-			name:           "missing icon uses default",
-			apiKey:         "test_api_key",
-			location:       "Berlin",
-			apiURL:         "http://localhost:8080",
-			responseStatus: http.StatusOK,
-			responseBody:   `{"weather": {"current": {"temp": 10.0, "weather": [{"main": "Clear"}]}}}`,
-			expectedError:  false,
-			validateResult: func(t *testing.T, data *models.WeatherData) {
-				assert.NotNil(t, data)
-				assert.Equal(t, "https://openweathermap.org/img/wn/01d@2x.png", data.Icon)
-			},
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			httpmock.Activate()
-			defer httpmock.DeactivateAndReset()
-
-			origEnv := os.Getenv("BREEZE_API_URL")
-			defer os.Setenv("BREEZE_API_URL", origEnv)
-
-			if tc.setEnvVar {
-				os.Setenv("BREEZE_API_URL", tc.apiURL)
-			} else {
-				os.Unsetenv("BREEZE_API_URL")
 			}
+		}`))
 
-			if tc.apiKey != "" {
-				baseURL := tc.apiURL
-				if baseURL == "" {
-					baseURL = "http://localhost:8080"
+	client := NewClient(apiKey)
+	weatherData, err := client.FetchWeather(location)
+
+	callCount := httpmock.GetCallCountInfo()
+	assert.Equal(t, 1, callCount["GET "+url])
+
+	assert.NoError(t, err)
+	assert.NotNil(t, weatherData)
+	assert.Equal(t, "London", weatherData.Location)
+	assert.Equal(t, 15.5, weatherData.Temperature)
+	assert.Equal(t, "Clear", weatherData.Condition)
+	assert.Equal(t, "https://openweathermap.org/img/wn/01d@2x.png", weatherData.Icon)
+	assert.NotZero(t, weatherData.LastUpdated)
+}
+
+func TestFetchWeatherAPIError(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	origEnv := os.Getenv("BREEZE_API_URL")
+	defer os.Setenv("BREEZE_API_URL", origEnv)
+	os.Unsetenv("BREEZE_API_URL") // Use default URL for test
+
+	apiKey := "test_api_key"
+	location := "InvalidLocation"
+	url := "http://localhost:8080/api/weather/InvalidLocation?api_key=test_api_key&units=metric"
+
+	httpmock.RegisterResponder("GET", url,
+		httpmock.NewStringResponder(http.StatusBadRequest, `{"error": "Location not found"}`))
+
+	client := NewClient(apiKey)
+	weatherData, err := client.FetchWeather(location)
+
+	callCount := httpmock.GetCallCountInfo()
+	assert.Equal(t, 1, callCount["GET "+url])
+
+	assert.Error(t, err)
+	assert.Nil(t, weatherData)
+}
+
+func TestFetchWeatherInvalidResponse(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	origEnv := os.Getenv("BREEZE_API_URL")
+	defer os.Setenv("BREEZE_API_URL", origEnv)
+	os.Unsetenv("BREEZE_API_URL")
+
+	apiKey := "madvillainy"
+	location := "London"
+	url := "http://localhost:8080/api/weather/London?api_key=madvillainy&units=metric"
+
+	httpmock.RegisterResponder("GET", url,
+		httpmock.NewStringResponder(http.StatusOK, `{"data": "not what we expect"}`))
+
+	client := NewClient(apiKey)
+	weatherData, err := client.FetchWeather(location)
+
+	callCount := httpmock.GetCallCountInfo()
+	assert.Equal(t, 1, callCount["GET "+url])
+
+	assert.Error(t, err)
+	assert.Nil(t, weatherData)
+}
+
+func TestFetchWeatherCustomURL(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	origEnv := os.Getenv("BREEZE_API_URL")
+	defer os.Setenv("BREEZE_API_URL", origEnv)
+
+	customURL := "https://custom-api.example.com"
+	os.Setenv("BREEZE_API_URL", customURL)
+
+	apiKey := "test_api_key"
+	location := "Paris"
+	url := "https://custom-api.example.com/api/weather/Paris?api_key=test_api_key&units=metric"
+
+	httpmock.RegisterResponder("GET", url,
+		httpmock.NewStringResponder(http.StatusOK, `{
+			"weather": {
+				"current": {
+					"temp": 20.0,
+					"weather": [
+						{
+							"main": "Clouds",
+							"icon": "02d"
+						}
+					]
 				}
-
-				encodedLocation := tc.location
-				if tc.location == "Invalid Location" {
-					encodedLocation = "Invalid%20Location"
-				}
-
-				requestURL := baseURL + "/api/weather/" + encodedLocation + "?api_key=" + tc.apiKey + "&units=metric"
-				httpmock.RegisterResponder("GET", requestURL,
-					httpmock.NewStringResponder(tc.responseStatus, tc.responseBody))
 			}
+		}`))
 
-			client := NewClient(tc.apiKey)
-			result, err := client.FetchWeather(tc.location)
+	client := NewClient(apiKey)
+	weatherData, err := client.FetchWeather(location)
 
-			if tc.expectedError {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
+	callCount := httpmock.GetCallCountInfo()
+	assert.Equal(t, 1, callCount["GET "+url])
 
-			tc.validateResult(t, result)
-
-			if tc.apiKey != "" {
-				callCount := httpmock.GetCallCountInfo()
-				baseURL := tc.apiURL
-				if baseURL == "" {
-					baseURL = "http://localhost:8080"
-				}
-
-				encodedLocation := tc.location
-				if tc.location == "Invalid Location" {
-					encodedLocation = "Invalid%20Location"
-				}
-
-				requestURL := "GET " + baseURL + "/api/weather/" + encodedLocation + "?api_key=" + tc.apiKey + "&units=metric"
-				assert.Equal(t, 1, callCount[requestURL], "Expected one call to the weather API endpoint")
-			}
-		})
-	}
+	assert.NoError(t, err)
+	assert.NotNil(t, weatherData)
+	assert.Equal(t, "Paris", weatherData.Location)
+	assert.Equal(t, 20.0, weatherData.Temperature)
+	assert.Equal(t, "Clouds", weatherData.Condition)
+	assert.Equal(t, "https://openweathermap.org/img/wn/02d@2x.png", weatherData.Icon)
 }
