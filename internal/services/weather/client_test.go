@@ -99,18 +99,6 @@ func TestFetchWeather(t *testing.T) {
 				assert.Equal(t, "https://openweathermap.org/img/wn/02d@2x.png", data.Icon)
 			},
 		},
-		// {
-		// 	name:           "API returns error status",
-		// 	apiKey:         "test_api_key",
-		// 	location:       "Invalid Location",
-		// 	apiURL:         "http://localhost:8080",
-		// 	responseStatus: http.StatusBadRequest,
-		// 	responseBody:   `{"error":"Invalid location"}`,
-		// 	expectedError:  true,
-		// 	validateResult: func(t *testing.T, data *models.WeatherData) {
-		// 		assert.Nil(t, data)
-		// 	},
-		// },
 		{
 			name:           "invalid JSON response",
 			apiKey:         "test_api_key",
@@ -213,11 +201,9 @@ func TestFetchWeather(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			// Setup httpmock
 			httpmock.Activate()
 			defer httpmock.DeactivateAndReset()
 
-			// Save original env and restore after test
 			origEnv := os.Getenv("BREEZE_API_URL")
 			defer os.Setenv("BREEZE_API_URL", origEnv)
 
@@ -233,7 +219,6 @@ func TestFetchWeather(t *testing.T) {
 					baseURL = "http://localhost:8080"
 				}
 
-				// Use URL encoding for the location
 				encodedLocation := tc.location
 				if tc.location == "Invalid Location" {
 					encodedLocation = "Invalid%20Location"
@@ -244,11 +229,9 @@ func TestFetchWeather(t *testing.T) {
 					httpmock.NewStringResponder(tc.responseStatus, tc.responseBody))
 			}
 
-			// Create client and call the method
 			client := NewClient(tc.apiKey)
 			result, err := client.FetchWeather(tc.location)
 
-			// Validate
 			if tc.expectedError {
 				assert.Error(t, err)
 			} else {
@@ -257,7 +240,6 @@ func TestFetchWeather(t *testing.T) {
 
 			tc.validateResult(t, result)
 
-			// Verify API was called with the right parameters
 			if tc.apiKey != "" {
 				callCount := httpmock.GetCallCountInfo()
 				baseURL := tc.apiURL
@@ -265,7 +247,6 @@ func TestFetchWeather(t *testing.T) {
 					baseURL = "http://localhost:8080"
 				}
 
-				// Handle URL encoding for verification too
 				encodedLocation := tc.location
 				if tc.location == "Invalid Location" {
 					encodedLocation = "Invalid%20Location"
