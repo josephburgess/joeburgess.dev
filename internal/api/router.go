@@ -27,7 +27,7 @@ func Setup(tmplRenderer *templates.Renderer, dataUpdater *templates.DataUpdater)
 	router.NotFoundHandler = http.HandlerFunc(homeHandler.HandleNotFound)
 
 	return &http.Server{
-		Addr:         ":8080",
+		Addr:         ":8081",
 		Handler:      router,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
