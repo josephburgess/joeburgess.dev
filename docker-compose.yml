@@ -6,13 +6,14 @@ services:
       dockerfile: Dockerfile
     restart: always
     container_name: joeburgess
+    env_file: ./.env
     environment:
       - BREEZE_API_KEY=${BREEZE_API_KEY}
       - BREEZE_API_URL=http://breeze:8080
     volumes:
       - ./static:/app/static
     ports:
-      - "8081:8080"
+      - "8081:8081"
     networks:
       - joeburgess-network
 

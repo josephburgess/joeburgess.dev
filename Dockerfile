@@ -23,6 +23,6 @@ COPY templates/ /app/templates/
 
 RUN mkdir -p /app/data
 
-EXPOSE 8080
+EXPOSE 8081
 
 CMD ["./joeburgess"]
