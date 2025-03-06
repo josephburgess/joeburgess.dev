@@ -25,7 +25,7 @@ func NewClient(username string) *Client {
 }
 
 func (c *Client) FetchRepositories() ([]models.Repository, error) {
-	url := fmt.Sprintf("https://api.github.com/users/%s/repos?sort=updated&per_page=6", c.username)
+	url := fmt.Sprintf("https://api.github.com/users/%s/repos?sort=updated&per_page=10", c.username)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
