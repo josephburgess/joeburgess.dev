@@ -23,7 +23,7 @@ func TestFetchRepositories(t *testing.T) {
 	defer httpmock.DeactivateAndReset()
 
 	username := "testuser"
-	url := "https://api.github.com/users/testuser/repos?sort=updated&per_page=6"
+	url := "https://api.github.com/users/testuser/repos?sort=updated&per_page=10"
 
 	httpmock.RegisterResponder("GET", url,
 		httpmock.NewStringResponder(http.StatusOK, `[
@@ -49,7 +49,7 @@ func TestFetchRepositoriesError(t *testing.T) {
 	defer httpmock.DeactivateAndReset()
 
 	username := "testuser"
-	url := "https://api.github.com/users/testuser/repos?sort=updated&per_page=6"
+	url := "https://api.github.com/users/testuser/repos?sort=updated&per_page=10"
 
 	httpmock.RegisterResponder("GET", url,
 		httpmock.NewStringResponder(http.StatusUnauthorized, `{"message": "Bad credentials"}`))
