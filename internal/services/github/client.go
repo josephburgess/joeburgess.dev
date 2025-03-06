@@ -25,7 +25,7 @@ func NewClient(username string) *Client {
 }
 
 func (c *Client) FetchRepositories() ([]models.Repository, error) {
-	url := fmt.Sprintf("https://api.github.com/users/%s/repos?sort=updated&per_page=6", c.username)
+	url := fmt.Sprintf("https://api.github.com/users/%s/repos?sort=updated&per_page=10", c.username)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -49,15 +49,22 @@ func (c *Client) FetchRepositories() ([]models.Repository, error) {
 		return nil, err
 	}
 
-	sort.Slice(repos, func(i, j int) bool {
-		return repos[i].UpdatedAt.After(repos[j].UpdatedAt)
-	})
-
-	if len(repos) > 6 {
-		repos = repos[:6]
+	filteredRepos := make([]models.Repository, 0)
+	for _, repo := range repos {
+		if repo.Name != "homebrew-formulae" {
+			filteredRepos = append(filteredRepos, repo)
+		}
 	}
 
-	return repos, nil
+	sort.Slice(filteredRepos, func(i, j int) bool {
+		return filteredRepos[i].UpdatedAt.After(filteredRepos[j].UpdatedAt)
+	})
+
+	if len(filteredRepos) > 6 {
+		filteredRepos = filteredRepos[:6]
+	}
+
+	return filteredRepos, nil
 }
 
 func (c *Client) FetchActivity() ([]models.Activity, error) {
