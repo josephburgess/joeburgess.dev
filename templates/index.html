@@ -13,10 +13,24 @@
     <link rel="stylesheet" href="/static/css/themes.css" />
     <link rel="stylesheet" href="/static/css/main.css" />
     <!-- Favicon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon/favicon-16x16.png">
-    <link rel="manifest" href="/static/favicon/site.webmanifest">
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/static/favicon/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/static/favicon/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/static/favicon/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/static/favicon/site.webmanifest" />
     <script>
       (function () {
         const savedTheme = localStorage.getItem("theme") || "dark";
@@ -45,7 +59,7 @@
 
       {{ if .GithubRepos }}
       <div class="github-section">
-        <h2>Recent Projects</h2>
+        <h2>Recent Repositories</h2>
         <div class="github-repos">
           {{ range .GithubRepos }}
           <a href="{{ .URL }}" class="repo-card" target="_blank" rel="noopener">
