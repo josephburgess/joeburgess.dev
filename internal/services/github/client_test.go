@@ -19,14 +19,19 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestFetchRepositories(t *testing.T) {
+	originalExcludes := ReposToExclude
+	ReposToExclude = []string{"homebrew-formulae"}
+	defer func() { ReposToExclude = originalExcludes }()
+
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
 	username := "testuser"
-	url := "https://api.github.com/users/testuser/repos?sort=updated&per_page=10"
+	url := "https://api.github.com/users/testuser/repos?sort=updated&per_page=6"
 
 	httpmock.RegisterResponder("GET", url,
 		httpmock.NewStringResponder(http.StatusOK, `[
+			{"name": "homebrew-formulae", "description": "Homebrew Formulae", "updated_at": "2023-01-03T00:00:00Z"},
 			{"name": "repo1", "description": "Test Repo 1", "updated_at": "2023-01-01T00:00:00Z"},
 			{"name": "repo2", "description": "Test Repo 2", "updated_at": "2023-01-02T00:00:00Z"}
 		]`))
@@ -40,6 +45,11 @@ func TestFetchRepositories(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, repos)
 	assert.Len(t, repos, 2)
+
+	for _, repo := range repos {
+		assert.NotEqual(t, "homebrew-formulae", repo.Name)
+	}
+
 	assert.Equal(t, "repo2", repos[0].Name)
 	assert.Equal(t, "repo1", repos[1].Name)
 }
