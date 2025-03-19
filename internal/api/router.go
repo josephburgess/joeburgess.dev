@@ -23,8 +23,15 @@ func Setup(tmplRenderer *templates.Renderer, dataUpdater *templates.DataUpdater)
 	router.HandleFunc("/update-data", homeHandler.HandleUpdateData).Methods("POST")
 	router.HandleFunc("/api/github-data", githubHandler.HandleGithubData).Methods("GET")
 
-	testPostPath := "content/posts/helloworld.md"
-	router.HandleFunc("/blog", glogger.PostHandler(testPostPath)).Methods("GET")
+	blog, err := glogger.New(glogger.Config{
+		ContentDir: "content/posts",
+		URLPrefix:  "/blog",
+	})
+	if err != nil {
+		logging.Error("Failed to create blog", err)
+	} else {
+		blog.RegisterHandlers(router)
+	}
 
 	fs := http.FileServer(http.Dir("static"))
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
