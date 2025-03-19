@@ -26,6 +26,7 @@ func Setup(tmplRenderer *templates.Renderer, dataUpdater *templates.DataUpdater)
 	blog, err := glogger.New(glogger.Config{
 		ContentDir: "content/posts",
 		URLPrefix:  "/blog",
+		Theme:      glogger.ThemeRosePine,
 	})
 	if err != nil {
 		logging.Error("Failed to create blog", err)
