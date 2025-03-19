@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/josephburgess/glog"
+	"github.com/josephburgess/glogger"
 	"github.com/josephburgess/joeburgess.dev/internal/api/handlers"
 	"github.com/josephburgess/joeburgess.dev/internal/logging"
 	"github.com/josephburgess/joeburgess.dev/internal/templates"
@@ -24,7 +24,7 @@ func Setup(tmplRenderer *templates.Renderer, dataUpdater *templates.DataUpdater)
 	router.HandleFunc("/api/github-data", githubHandler.HandleGithubData).Methods("GET")
 
 	testPostPath := "content/posts/helloworld.md"
-	router.HandleFunc("/blog", glog.PostHandler(testPostPath)).Methods("GET")
+	router.HandleFunc("/blog", glogger.PostHandler(testPostPath)).Methods("GET")
 
 	fs := http.FileServer(http.Dir("static"))
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
