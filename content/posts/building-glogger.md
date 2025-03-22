@@ -8,7 +8,7 @@ Well, welcome to this blog I guess! I have lately built a few projects - my pers
 
 I wanted something super lightweight that would be easy enough to implement without relying on a full CMS or complex external tools. My initial mvp outlined four things I wanted to achieve:
 
-1. Parse simple markdown posts - no CMS just files stored in the directory
+1. Simply markdown files - no CMS, no database
 2. Support a few themes
 3. Simple integration - just plugged into the core router
 4. Lightweight/fast
