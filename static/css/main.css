@@ -365,3 +365,40 @@ h2 {
     grid-template-columns: 1fr;
   }
 }
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.nav-link {
+  color: var(--iris);
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  position: relative;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.nav-link:hover {
+  color: var(--rose);
+}
+
+.nav-link:after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: var(--rose);
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover:after {
+  width: 100%;
+}
