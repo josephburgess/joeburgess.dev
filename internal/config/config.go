@@ -20,7 +20,7 @@ func Load() *Config {
 	return &Config{
 		ServerAddress:   getEnv("SERVER_ADDRESS", ":8081"),
 		GithubUsername:  getEnv("GITHUB_USERNAME", "josephburgess"),
-		WeatherLocation: getEnv("WEATHER_LOCATION", "Buenosaires, AR"),
+		WeatherLocation: getEnv("WEATHER_LOCATION", "London, GB"),
 		WeatherAPIKey:   os.Getenv("BREEZE_API_KEY"),
 		ProfileImage:    "/static/images/profile.png",
 		GithubURL:       "https://github.com/josephburgess",

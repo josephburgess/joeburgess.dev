@@ -32,9 +32,9 @@ go run main.go
 
 ## Weather Widget
 
-I added the widget mainly because I wanted to integrate it with [breeze](https://github.com/josephburgess/breeze), a lightweight API service I've set up for [gust](http://github.com/josephburgess/gust), another small project I'm working on. At the moment its showing current conditions in Buenos Aires, Argentina (where I'm currently based). 
+I added the widget mainly because I wanted to integrate it with [breeze](https://github.com/josephburgess/breeze), a lightweight API service I've set up for [gust](http://github.com/josephburgess/gust), another small project I'm working on. I am now based back home in London, so that's where it shows the weather for.
 
-For the widget to work running locally you'll need a breeze API key, for which you'll need to sign up through gust for now. I may make this more accessible but I doubt people want to run my personal site locally.
+For the widget to work running locally you'll need an API key - you can either install gust and use the one-click signup to get a key, or use your own OpenWeatherMap 3.0 key.
 
 ## Future Plans
 
