@@ -18,6 +18,7 @@ WORKDIR /app
 
 COPY --from=builder /app/joeburgess .
 
+COPY --from=builder /app/content/ /app/content/
 COPY static/ /app/static/
 COPY templates/ /app/templates/
 
