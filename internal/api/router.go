@@ -1,3 +1,4 @@
+// Package api sets up the http server and routes
 package api
 
 import (

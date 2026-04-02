@@ -1,3 +1,4 @@
+// Package templates handles html template rendering and weather/github stuff
 package templates
 
 import (

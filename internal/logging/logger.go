@@ -1,3 +1,4 @@
+// Package logging provides structured logging and http middleware
 package logging
 
 import (
