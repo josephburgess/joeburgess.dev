@@ -31,7 +31,13 @@ func Setup(tmplRenderer *templates.Renderer, dataUpdater *templates.DataUpdater)
 	if err != nil {
 		logging.Error("Failed to create blog", err)
 	} else {
-		blog.RegisterHandlers(router)
+		router.HandleFunc("/blog", func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, "/blog/", http.StatusMovedPermanently)
+		}).Methods("GET")
+		prefix := blog.URLPrefix()
+		router.PathPrefix(prefix).Handler(
+			http.StripPrefix(prefix, blog.Handler()),
+		)
 	}
 
 	fs := http.FileServer(http.Dir("static"))
