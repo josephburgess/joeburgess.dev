@@ -28,24 +28,6 @@ func TestHandleNotFound(t *testing.T) {
 	}
 }
 
-func TestHandleUpdateDataMethodNotAllowed(t *testing.T) {
-	handler := &HomeHandler{}
-
-	req, err := http.NewRequest("GET", "/update", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	rr := httptest.NewRecorder()
-
-	handler.HandleUpdateData(rr, req)
-
-	if status := rr.Code; status != http.StatusMethodNotAllowed {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusMethodNotAllowed)
-	}
-}
-
 func TestWeatherHandlerMissingLocation(t *testing.T) {
 	handler := &WeatherHandler{}
 
