@@ -4,15 +4,20 @@ import (
 	"sync"
 	"time"
 
+	"github.com/josephburgess/joeburgess.dev/internal/models"
 	"github.com/josephburgess/joeburgess.dev/internal/services/github"
 	"github.com/josephburgess/joeburgess.dev/internal/services/weather"
 )
 
 type DataUpdater struct {
+	mu              sync.RWMutex
 	data            *PageData
 	githubService   *github.Client
 	weatherService  *weather.Client
 	weatherLocation string
+	lastUpdated     time.Time
+	maxAge          time.Duration
+	updating        sync.Mutex
 }
 
 func NewDataUpdater(
@@ -39,12 +44,17 @@ func NewDataUpdater(
 		githubService:   githubService,
 		weatherService:  weatherService,
 		weatherLocation: weatherLocation,
+		maxAge:          1 * time.Hour,
 	}
 }
 
 func (du *DataUpdater) GetData() PageData {
-	du.data.mu.RLock()
-	defer du.data.mu.RUnlock()
+	if time.Since(du.lastUpdated) > du.maxAge {
+		go du.UpdateIfStale()
+	}
+
+	du.mu.RLock()
+	defer du.mu.RUnlock()
 
 	dataCopy := PageData{
 		ProfileImage:     du.data.ProfileImage,
@@ -66,61 +76,75 @@ func (du *DataUpdater) GetData() PageData {
 	return dataCopy
 }
 
+// UpdateIfStale triggers an update only if one isn't already running.
+func (du *DataUpdater) UpdateIfStale() {
+	if !du.updating.TryLock() {
+		return // another update is already in progress
+	}
+	defer du.updating.Unlock()
+
+	// double-check after acquiring lock
+	if time.Since(du.lastUpdated) <= du.maxAge {
+		return
+	}
+
+	du.Update()
+}
+
 func (du *DataUpdater) Update() {
 	var wg sync.WaitGroup
+
+	var repos []models.Repository
+	var activities []models.Activity
+	var weatherData *models.WeatherData
+
 	wg.Add(3)
 
 	go func() {
 		defer wg.Done()
-		repos, err := du.githubService.FetchRepositories()
+		r, err := du.githubService.FetchRepositories()
 		if err != nil {
 			return
 		}
-
-		du.data.mu.Lock()
-		du.data.GithubRepos = repos
-		du.data.mu.Unlock()
+		repos = r
 	}()
 
 	go func() {
 		defer wg.Done()
-		activities, err := du.githubService.FetchActivity()
+		a, err := du.githubService.FetchActivity()
 		if err != nil {
 			return
 		}
-
-		du.data.mu.Lock()
-		du.data.GitHubActivities = activities
-		du.data.mu.Unlock()
+		activities = a
 	}()
 
 	go func() {
 		defer wg.Done()
 		if du.weatherLocation != "" {
-			weather, err := du.weatherService.FetchWeather(du.weatherLocation)
+			w, err := du.weatherService.FetchWeather(du.weatherLocation)
 			if err != nil {
 				return
 			}
-
-			du.data.mu.Lock()
-			du.data.Weather = weather
-			du.data.mu.Unlock()
+			weatherData = w
 		}
 	}()
 
 	wg.Wait()
 
-	now := time.Now()
-	du.data.mu.Lock()
-	du.data.LastUpdated = now.Format("Jan 02 2006 15:04:05")
-	du.data.mu.Unlock()
-}
+	du.mu.Lock()
+	defer du.mu.Unlock()
 
-func (du *DataUpdater) StartBackgroundUpdater(interval time.Duration) {
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		du.Update()
+	if repos != nil {
+		du.data.GithubRepos = repos
 	}
+	if activities != nil {
+		du.data.GitHubActivities = activities
+	}
+	if weatherData != nil {
+		du.data.Weather = weatherData
+	}
+
+	now := time.Now()
+	du.data.LastUpdated = now.Format("Jan 02 2006 15:04:05")
+	du.lastUpdated = now
 }

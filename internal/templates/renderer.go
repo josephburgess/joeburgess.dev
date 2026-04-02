@@ -25,7 +25,6 @@ type PageData struct {
 	GitHubActivities []models.Activity
 	LastUpdated      string
 	Weather          *models.WeatherData
-	mu               sync.RWMutex
 }
 
 type Renderer struct {

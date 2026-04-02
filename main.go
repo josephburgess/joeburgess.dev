@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/josephburgess/joeburgess.dev/internal/api"
@@ -42,8 +41,6 @@ func main() {
 	)
 
 	dataUpdater.Update()
-
-	go dataUpdater.StartBackgroundUpdater(15 * time.Minute)
 
 	r := api.Setup(tmplRenderer, dataUpdater)
 
