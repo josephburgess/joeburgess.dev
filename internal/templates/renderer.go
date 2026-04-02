@@ -52,7 +52,9 @@ func NewRenderer() *Renderer {
 		tmplPath:    tmplPath,
 	}
 
-	go renderer.watchTemplate()
+	if os.Getenv("DEV_MODE") != "" {
+		go renderer.watchTemplate()
+	}
 
 	return renderer
 }
