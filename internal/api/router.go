@@ -19,6 +19,7 @@ func Setup(tmplRenderer *templates.Renderer, dataUpdater *templates.DataUpdater)
 	mux.HandleFunc("GET /{$}", homeHandler.HandleHome)
 	mux.HandleFunc("POST /update-data", homeHandler.HandleUpdateData)
 	mux.HandleFunc("GET /api/github-data", githubHandler.HandleGithubData)
+	mux.HandleFunc("/", homeHandler.HandleNotFound)
 
 	blog, err := glogger.New(glogger.Config{
 		ContentDir: "content/posts",

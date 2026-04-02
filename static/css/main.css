@@ -402,3 +402,37 @@ h2 {
 .nav-link:hover:after {
   width: 100%;
 }
+
+.error-container {
+    text-align: center;
+    padding: 2rem;
+}
+
+.error-code {
+    font-size: 6rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1;
+}
+
+.error-msg {
+    font-size: 1.2rem;
+    color: var(--secondary);
+    margin: 1rem 0 2rem;
+}
+
+.home-link {
+    color: var(--iris);
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--overlay);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.home-link:hover {
+    background: var(--overlay);
+    color: var(--rose);
+}
