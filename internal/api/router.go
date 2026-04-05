@@ -1,10 +1,10 @@
+// Package api sets up the http server and routes
 package api
 
 import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
 	"github.com/josephburgess/glogger"
 	"github.com/josephburgess/joeburgess.dev/internal/api/handlers"
 	"github.com/josephburgess/joeburgess.dev/internal/logging"
@@ -12,35 +12,38 @@ import (
 )
 
 func Setup(tmplRenderer *templates.Renderer, dataUpdater *templates.DataUpdater) *http.Server {
-	router := mux.NewRouter()
+	mux := http.NewServeMux()
 
 	homeHandler := handlers.NewHomeHandler(tmplRenderer, dataUpdater)
 	githubHandler := handlers.NewGithubHandler(dataUpdater)
 
-	router.Use(logging.Middleware)
-
-	router.HandleFunc("/", homeHandler.HandleHome).Methods("GET")
-	router.HandleFunc("/update-data", homeHandler.HandleUpdateData).Methods("POST")
-	router.HandleFunc("/api/github-data", githubHandler.HandleGithubData).Methods("GET")
+	mux.HandleFunc("GET /{$}", homeHandler.HandleHome)
+	mux.HandleFunc("POST /update-data", homeHandler.HandleUpdateData)
+	mux.HandleFunc("GET /api/github-data", githubHandler.HandleGithubData)
+	mux.HandleFunc("/", homeHandler.HandleNotFound)
 
 	blog, err := glogger.New(glogger.Config{
-		ContentDir: "content/posts",
-		URLPrefix:  "/blog",
-		Theme:      glogger.ThemeRosePine,
+		ContentDir:  "content/posts",
+		URLPrefix:   "/blog",
+		Theme:       glogger.ThemeRosePine,
+		Title:       "joeburgess.blog",
+		Description: "Joe Burgess personal blog",
+		BaseURL:     "https://joeburgess.dev",
 	})
 	if err != nil {
 		logging.Error("Failed to create blog", err)
 	} else {
-		blog.RegisterHandlers(router)
+		blog.Mount(mux)
 	}
 
 	fs := http.FileServer(http.Dir("static"))
-	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
-	router.NotFoundHandler = http.HandlerFunc(homeHandler.HandleNotFound)
+	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+
+	handler := logging.Middleware(mux)
 
 	return &http.Server{
 		Addr:         ":8081",
-		Handler:      router,
+		Handler:      handler,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,

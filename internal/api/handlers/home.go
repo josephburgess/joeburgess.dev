@@ -1,3 +1,4 @@
+// Package handlers provides HTTP request handlers for the application.
 package handlers
 
 import (
@@ -19,11 +20,6 @@ func NewHomeHandler(renderer *templates.Renderer, dataUpdater *templates.DataUpd
 }
 
 func (h *HomeHandler) HandleHome(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		h.HandleNotFound(w, r)
-		return
-	}
-
 	data := h.dataUpdater.GetData()
 	cookie, err := r.Cookie("theme")
 	if err == nil {
@@ -41,11 +37,6 @@ func (h *HomeHandler) HandleHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HomeHandler) HandleUpdateData(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	go h.dataUpdater.Update()
 
 	w.WriteHeader(http.StatusAccepted)
@@ -53,6 +44,7 @@ func (h *HomeHandler) HandleUpdateData(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HomeHandler) HandleNotFound(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusNotFound)
-	w.Write([]byte("404 - Page not found"))
+	http.ServeFile(w, r, "templates/404.html")
 }

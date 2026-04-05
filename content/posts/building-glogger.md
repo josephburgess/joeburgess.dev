@@ -1,6 +1,11 @@
-# first post! glogger: a simple go blog engine
+---
+title: "first post! glogger: a simple go blog engine"
+date: 2025-06-22
+description: "building a lightweight markdown blog engine in go"
+tags: ["go", "glogger"]
+---
 
-2025-03-22
+> **Note:** This post was written when glogger was first built and some details are now outdated now. in particular, the routing section describes the old gorilla/mux integration which has since been replaced with stdlib `net/http` since gorilla/mux was discontinued. The rest of the content still reflects the general approach and design decisions.
 
 Well, welcome to this blog I guess! I have lately built a few projects - my personal site included - in go. I've found it super fun to code in, it works out of the box and feels like a happy middle ground between very high level languages and lower level systems languages. I have now become obsessed with learning rust but I also wanted to add a blog to my site. I really wanted it to be as barebones as possible - there is some great software out there but I found it all a bit overengineered, so I decided I'd do one last go side project before getting really deep into finishing the rust book and trying to build something in rust!
 
@@ -18,7 +23,6 @@ I wanted something super lightweight that would be easy enough to implement with
 ### Simple Integration
 
 Since this was originally just going to be built INTO my personal site, making it into a package instead I really needed it to integrate simply/with a few lines of code. Here's all it takes to add blogging to your Go site:
-
 ```go
 // Create a new blog with default settings
 blog, err := glogger.New(glogger.Config{
@@ -42,7 +46,6 @@ With this minimal configuration, glogger sets up these routes:
 #### 1. Embedding
 
 I was quite pleased with how simply the embed package works to stitch files directly into the binary:
-
 ```go
 //go:embed assets/templates/*.html
 var templatesFS embed.FS
@@ -53,10 +56,9 @@ var themeFS embed.FS
 
 This ensures that the templates/css etc are always available at runtime. Before discovering this I was having real trouble allowing users to define their theme and the blog kept loading without the styling.
 
-#### 2. File walking
+#### 2. File Walking
 
 Finding and parsing all blog posts is handled through the [filepath.Walk](https://pkg.go.dev/path/filepath#Walk) function:
-
 ```go
 err := filepath.Walk(b.config.ContentDir, func(path string, info fs.FileInfo, err error) error {
     if err != nil {
@@ -82,7 +84,6 @@ I found this to be a really nice way to iterate over all the files and apply the
 #### 3. Markdown parsing
 
 Sadly this is not a zero dependency package! I used [goldmark](https://github.com/yuin/goldmark). It felt like too much of an undertaking to write a markdown parser from scratch! Especially when goldmark is well maintained, well loved, lightweight, FOSS software.
-
 ```go
 md := goldmark.New(
     goldmark.WithParserOptions(
@@ -98,7 +99,6 @@ if err := md.Convert([]byte(filteredContent), &buf); err != nil {
 #### 4. Routing
 
 Another dependency :( ... for now I've relied on [gorilla/mux](https://github.com/gorilla/mux) for the routing. This was simply because its what I already had used for my personal site.
-
 ```go
 func (b *Blog) RegisterHandlers(router *mux.Router) {
     blogRouter := router.PathPrefix(b.config.URLPrefix).Subrouter()
