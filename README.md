@@ -37,7 +37,7 @@ go run main.go
 
 I added a widget mainly because I wanted to integrate it with [breeze](https://github.com/josephburgess/breeze), a lightweight API service I've set up for [gust](http://github.com/josephburgess/gust), another small project I'm working on. I am now based back home in London, so that's where it shows the weather for.
 
-For the widget to work running locally you'll need an API key. You can either install gust and use the one-click signup to get a key, or use your own OpenWeatherMap 3.0 key.
+The weather widget requires a `BREEZE_API_KEY`. Without one it's simply hidden. You can get a key via [gust](https://github.com/josephburgess/gust) or use your own OpenWeatherMap key pointed at a local breeze instance.
 
 ## Blog
 
