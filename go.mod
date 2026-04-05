@@ -5,7 +5,7 @@ go 1.24.1
 require (
 	github.com/jarcoal/httpmock v1.3.1
 	github.com/joho/godotenv v1.5.1
-	github.com/josephburgess/glogger v0.1.0
+	github.com/josephburgess/glogger v0.3.0
 	github.com/stretchr/testify v1.8.1
 	go.uber.org/zap v1.27.0
 )
@@ -22,4 +22,4 @@ require (
 )
 
 // local dev
-replace github.com/josephburgess/glogger => ../glogger
+// replace github.com/josephburgess/glogger => ../glogger
