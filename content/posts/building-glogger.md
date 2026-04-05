@@ -5,6 +5,8 @@ description: "building a lightweight markdown blog engine in go"
 tags: ["go", "glogger"]
 ---
 
+> **Note:** This post was written when glogger was first built and some details are now outdated now. in particular, the routing section describes the old gorilla/mux integration which has since been replaced with stdlib `net/http` since gorilla/mux was discontinued. The rest of the content still reflects the general approach and design decisions.
+
 Well, welcome to this blog I guess! I have lately built a few projects - my personal site included - in go. I've found it super fun to code in, it works out of the box and feels like a happy middle ground between very high level languages and lower level systems languages. I have now become obsessed with learning rust but I also wanted to add a blog to my site. I really wanted it to be as barebones as possible - there is some great software out there but I found it all a bit overengineered, so I decided I'd do one last go side project before getting really deep into finishing the rust book and trying to build something in rust!
 
 ## MVP
