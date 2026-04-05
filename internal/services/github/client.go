@@ -4,11 +4,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 	"sort"
 	"time"
 
 	"github.com/josephburgess/joeburgess.dev/internal/models"
 )
+
+var ReposToExclude = []string{
+	"homebrew-formulae",
+	"excalith-start-page",
+}
+
+func shouldIncludeRepo(repoName string) bool {
+	return !slices.Contains(ReposToExclude, repoName)
+}
 
 type Client struct {
 	username   string
@@ -51,7 +61,7 @@ func (c *Client) FetchRepositories() ([]models.Repository, error) {
 
 	filteredRepos := make([]models.Repository, 0)
 	for _, repo := range repos {
-		if ShouldIncludeRepo(repo.Name) {
+		if shouldIncludeRepo(repo.Name) {
 			filteredRepos = append(filteredRepos, repo)
 		}
 	}

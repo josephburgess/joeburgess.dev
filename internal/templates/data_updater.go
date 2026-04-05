@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/josephburgess/joeburgess.dev/internal/logging"
 	"github.com/josephburgess/joeburgess.dev/internal/models"
 	"github.com/josephburgess/joeburgess.dev/internal/services/github"
 	"github.com/josephburgess/joeburgess.dev/internal/services/weather"
@@ -30,17 +31,14 @@ func NewDataUpdater(
 	breezeURL string,
 	email string,
 ) *DataUpdater {
-	data := &PageData{
-		ProfileImage: profileImage,
-		GithubURL:    githubURL,
-		LinkedInURL:  linkedInURL,
-		BreezeURL:    breezeURL,
-		Email:        email,
-		IsDarkMode:   false,
-	}
-
 	return &DataUpdater{
-		data:            data,
+		data: &PageData{
+			ProfileImage: profileImage,
+			GithubURL:    githubURL,
+			LinkedInURL:  linkedInURL,
+			BreezeURL:    breezeURL,
+			Email:        email,
+		},
 		githubService:   githubService,
 		weatherService:  weatherService,
 		weatherLocation: weatherLocation,
@@ -49,42 +47,30 @@ func NewDataUpdater(
 }
 
 func (du *DataUpdater) GetData() PageData {
-	if time.Since(du.lastUpdated) > du.maxAge {
+	du.mu.RLock()
+	stale := time.Since(du.lastUpdated) > du.maxAge
+	data := du.copyData()
+	du.mu.RUnlock()
+
+	if stale {
 		go du.UpdateIfStale()
 	}
 
-	du.mu.RLock()
-	defer du.mu.RUnlock()
-
-	dataCopy := PageData{
-		ProfileImage:     du.data.ProfileImage,
-		GithubURL:        du.data.GithubURL,
-		LinkedInURL:      du.data.LinkedInURL,
-		BreezeURL:        du.data.BreezeURL,
-		Email:            du.data.Email,
-		IsDarkMode:       du.data.IsDarkMode,
-		LastUpdated:      du.data.LastUpdated,
-		GithubRepos:      du.data.GithubRepos,
-		GitHubActivities: du.data.GitHubActivities,
-	}
-
-	if du.data.Weather != nil {
-		weatherCopy := *du.data.Weather
-		dataCopy.Weather = &weatherCopy
-	}
-
-	return dataCopy
+	return data
 }
 
 // UpdateIfStale triggers an update only if one isn't already running.
 func (du *DataUpdater) UpdateIfStale() {
 	if !du.updating.TryLock() {
-		return // another update is already in progress
+		return
 	}
 	defer du.updating.Unlock()
 
-	// double-check after acquiring lock
-	if time.Since(du.lastUpdated) <= du.maxAge {
+	du.mu.RLock()
+	fresh := time.Since(du.lastUpdated) <= du.maxAge
+	du.mu.RUnlock()
+
+	if fresh {
 		return
 	}
 
@@ -92,11 +78,12 @@ func (du *DataUpdater) UpdateIfStale() {
 }
 
 func (du *DataUpdater) Update() {
-	var wg sync.WaitGroup
-
-	var repos []models.Repository
-	var activities []models.Activity
-	var weatherData *models.WeatherData
+	var (
+		wg           sync.WaitGroup
+		repos        []models.Repository
+		activities   []models.Activity
+		weatherData  *models.WeatherData
+	)
 
 	wg.Add(3)
 
@@ -104,6 +91,7 @@ func (du *DataUpdater) Update() {
 		defer wg.Done()
 		r, err := du.githubService.FetchRepositories()
 		if err != nil {
+			logging.Error("Failed to fetch repositories", err)
 			return
 		}
 		repos = r
@@ -113,6 +101,7 @@ func (du *DataUpdater) Update() {
 		defer wg.Done()
 		a, err := du.githubService.FetchActivity()
 		if err != nil {
+			logging.Error("Failed to fetch GitHub activity", err)
 			return
 		}
 		activities = a
@@ -120,13 +109,15 @@ func (du *DataUpdater) Update() {
 
 	go func() {
 		defer wg.Done()
-		if du.weatherLocation != "" {
-			w, err := du.weatherService.FetchWeather(du.weatherLocation)
-			if err != nil {
-				return
-			}
-			weatherData = w
+		if du.weatherLocation == "" {
+			return
 		}
+		w, err := du.weatherService.FetchWeather(du.weatherLocation)
+		if err != nil {
+			logging.Error("Failed to fetch weather", err)
+			return
+		}
+		weatherData = w
 	}()
 
 	wg.Wait()
@@ -147,4 +138,23 @@ func (du *DataUpdater) Update() {
 	now := time.Now()
 	du.data.LastUpdated = now.Format("Jan 02 2006 15:04:05")
 	du.lastUpdated = now
+}
+
+func (du *DataUpdater) copyData() PageData {
+	d := PageData{
+		ProfileImage:     du.data.ProfileImage,
+		GithubURL:        du.data.GithubURL,
+		LinkedInURL:      du.data.LinkedInURL,
+		BreezeURL:        du.data.BreezeURL,
+		Email:            du.data.Email,
+		IsDarkMode:       du.data.IsDarkMode,
+		LastUpdated:      du.data.LastUpdated,
+		GithubRepos:      du.data.GithubRepos,
+		GitHubActivities: du.data.GitHubActivities,
+	}
+	if du.data.Weather != nil {
+		weatherCopy := *du.data.Weather
+		d.Weather = &weatherCopy
+	}
+	return d
 }

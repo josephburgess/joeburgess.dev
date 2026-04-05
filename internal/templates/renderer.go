@@ -4,13 +4,13 @@ package templates
 import (
 	"fmt"
 	"html/template"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/josephburgess/joeburgess.dev/internal/logging"
 	"github.com/josephburgess/joeburgess.dev/internal/models"
 )
 
@@ -43,7 +43,8 @@ func NewRenderer() *Renderer {
 		"toLower":    strings.ToLower,
 	}).ParseFiles(tmplPath)
 	if err != nil {
-		log.Fatalf("Error parsing template: %v", err)
+		logging.Error("Error parsing template", err)
+		os.Exit(1)
 	}
 
 	renderer := &Renderer{
@@ -85,7 +86,7 @@ func (r *Renderer) watchTemplate() {
 		}
 
 		if info.ModTime().After(r.lastModTime) {
-			log.Println("Template changed, reloading...")
+			logging.Info("Template changed, reloading...")
 
 			newTmpl, err := template.New("index.html").Funcs(template.FuncMap{
 				"formatDate": formatDate,
@@ -93,7 +94,7 @@ func (r *Renderer) watchTemplate() {
 				"toLower":    strings.ToLower,
 			}).ParseFiles(r.tmplPath)
 			if err != nil {
-				log.Printf("Error parsing template: %v", err)
+				logging.Error("Error reloading template", err)
 				continue
 			}
 
@@ -102,7 +103,7 @@ func (r *Renderer) watchTemplate() {
 			r.lastModTime = info.ModTime()
 			r.mu.Unlock()
 
-			log.Println("Template reloaded successfully")
+			logging.Info("Template reloaded successfully")
 		}
 	}
 }
