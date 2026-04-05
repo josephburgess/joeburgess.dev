@@ -8,38 +8,40 @@ My personal website built with Go, serving as a basic snapshot of what I'm up to
 
 ## Features
 
-- 🌓 Dark/light theme (rose pine)
-- 📊 GitHub integration showing recent repos/activity
-- 🌤️ Weather served by my own [breeze api](https://github.com/josephburgess/breeze)
-- 🔄 Data on periodic refresh every 15mins (rather than on refreshing page - keep that traffic down!)
-- 📱 Responsive
+- Dark/light theme (rose pine)
+- GitHub integration — recent repos and activity
+- Weather via my own [breeze API](https://github.com/josephburgess/breeze)
+- Background data refresh (hourly, not on page load)
+- Blog powered by [glogger](https://github.com/josephburgess/glogger)
+- Responsive
 
-## Technical Details
+## Stack
 
-- **Backend**: Go (Golang)
-- **Frontend**: HTML, CSS, JavaScript
-- **Blog**: [glogger](https://github.com/josephburgess/glogger) - my lightweight Go blog package
-- **Hosting**: Deployed w/ Docker on a very minimal [DigitalOcean](https://www.digitalocean.com/) VPS (details in the Terraform setup [here](https://github.com/josephburgess/backstage))
+- **Backend**: Go with stdlib `net/http`
+- **Templating**: Go `html/template`
+- **Blog**: [glogger](https://github.com/josephburgess/glogger) — my own lightweight markdown blog engine
+- **Hosting**: Docker on a DigitalOcean VPS (infra via [backstage](https://github.com/josephburgess/backstage))
 
-## Development
+## Running locally
 
 If for some reason you wanted to run it locally:
 
 ```bash
 git clone https://github.com/josephburgess/joeburgess.dev.git
 cd joeburgess.dev
+cp .env.example .env  # add your BREEZE_API_KEY if you want the weather widget
 go run main.go
 ```
 
 ## Weather Widget
 
-I added the widget mainly because I wanted to integrate it with [breeze](https://github.com/josephburgess/breeze), a lightweight API service I've set up for [gust](http://github.com/josephburgess/gust), another small project I'm working on. I am now based back home in London, so that's where it shows the weather for.
+I added a widget mainly because I wanted to integrate it with [breeze](https://github.com/josephburgess/breeze), a lightweight API service I've set up for [gust](http://github.com/josephburgess/gust), another small project I'm working on. I am now based back home in London, so that's where it shows the weather for.
 
-For the widget to work running locally you'll need an API key - you can either install gust and use the one-click signup to get a key, or use your own OpenWeatherMap 3.0 key.
+For the widget to work running locally you'll need an API key. You can either install gust and use the one-click signup to get a key, or use your own OpenWeatherMap 3.0 key.
 
 ## Blog
 
-The site now includes a blog powered by [glogger](https://github.com/josephburgess/glogger), a lightweight blog engine package I built in go. It supports simple markdown content (no database), multiple themes, and simple integration with existing go sites (as long as you use gorilla/mux, for now!).
+The site now includes a blog powered by [glogger](https://github.com/josephburgess/glogger), a lightweight blog engine package I built in go. It supports simple markdown content (no database), multiple themes, and simple integration with existing go sites.
 
 ## Future Plans
 
