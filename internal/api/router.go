@@ -23,18 +23,17 @@ func Setup(tmplRenderer *templates.Renderer, dataUpdater *templates.DataUpdater)
 	mux.HandleFunc("/", homeHandler.HandleNotFound)
 
 	blog, err := glogger.New(glogger.Config{
-		ContentDir: "content/posts",
-		URLPrefix:  "/blog",
-		Theme:      glogger.ThemeRosePine,
+		ContentDir:  "content/posts",
+		URLPrefix:   "/blog",
+		Theme:       glogger.ThemeRosePine,
+		Title:       "joeburgess.blog",
+		Description: "Joe Burgess personal blog",
+		BaseURL:     "https://joeburgess.dev",
 	})
 	if err != nil {
 		logging.Error("Failed to create blog", err)
 	} else {
-		prefix := blog.URLPrefix()
-		mux.HandleFunc("GET "+prefix, func(w http.ResponseWriter, r *http.Request) {
-			http.Redirect(w, r, prefix+"/", http.StatusMovedPermanently)
-		})
-		mux.Handle(prefix+"/", http.StripPrefix(prefix, blog.Handler()))
+		blog.Mount(mux)
 	}
 
 	fs := http.FileServer(http.Dir("static"))
