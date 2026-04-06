@@ -26,7 +26,11 @@ jobs:
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
-          script: rm -rf /var/www/joeburgess-dev
+          script: |
+            cp /var/www/joeburgess-dev/.env /tmp/.env.bak 2>/dev/null || true
+            rm -rf /var/www/joeburgess-dev
+            mkdir -p /var/www/joeburgess-dev
+            mv /tmp/.env.bak /var/www/joeburgess-dev/.env 2>/dev/null || true
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
