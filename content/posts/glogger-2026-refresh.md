@@ -1,7 +1,7 @@
 ---
-title: "glogger in 2026: rss, stdlib routing, and a tidy up"
+title: "glogger in 2026: rss, stdlib routing and a clean up"
 date: 2026-04-06
-description: "a look at what changed in the 2026 refresh of glogger — dropping gorilla/mux, adding syntax highlighting, YAML frontmatter, RSS, and a cleaner API"
+description: "decided to use some of my easter hols to dust off my golang"
 tags: ["go", "glogger"]
 ---
 
