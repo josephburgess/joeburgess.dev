@@ -19,6 +19,15 @@ jobs:
         run: |
           go build -o joeburgess-site
 
+      - name: Clean server directory
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.DO_HOST }}
+          username: ${{ secrets.DO_USERNAME }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          port: 22
+          script: rm -rf /var/www/joeburgess-dev
+
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
         with:
