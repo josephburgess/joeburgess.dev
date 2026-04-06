@@ -26,11 +26,7 @@ jobs:
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
           port: 22
-          script: |
-            cp /var/www/joeburgess-dev/.env /tmp/.env.bak 2>/dev/null || true
-            rm -rf /var/www/joeburgess-dev
-            mkdir -p /var/www/joeburgess-dev
-            mv /tmp/.env.bak /var/www/joeburgess-dev/.env 2>/dev/null || true
+          script: rm -rf /var/www/joeburgess-dev && mkdir -p /var/www/joeburgess-dev
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
@@ -41,6 +37,15 @@ jobs:
           port: 22
           source: "./,!.git/,!tmp/"
           target: "/var/www/joeburgess-dev"
+
+      - name: Write .env file
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.DO_HOST }}
+          username: ${{ secrets.DO_USERNAME }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          port: 22
+          script: echo "BREEZE_API_KEY=${{ secrets.BREEZE_API_KEY }}" > /var/www/joeburgess-dev/.env
 
       - name: Deploy Docker container
         uses: appleboy/ssh-action@v1.2.1
