@@ -20,6 +20,9 @@ func Setup(tmplRenderer *templates.Renderer, dataUpdater *templates.DataUpdater)
 	mux.HandleFunc("GET /{$}", homeHandler.HandleHome)
 	mux.HandleFunc("POST /update-data", homeHandler.HandleUpdateData)
 	mux.HandleFunc("GET /api/github-data", githubHandler.HandleGithubData)
+	mux.HandleFunc("GET /shuck/privacy", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "templates/shuck-privacy.html")
+	})
 	mux.HandleFunc("/", homeHandler.HandleNotFound)
 
 	blog, err := glogger.New(glogger.Config{
